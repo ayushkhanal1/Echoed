@@ -1,0 +1,189 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Toned-down matte silver cement studio canvas (eye-soothing, zero harsh glare) */
+  --canvas-top: #a8b0be;
+  --canvas-mid: #959fae;
+  --canvas-bot: #808a9b;
+  --foreground: #0f172a;
+}
+
+/* Dark Theme (preserved exactly as configured) */
+.dark {
+  --canvas-top: #101622;
+  --canvas-mid: #0b0f17;
+  --canvas-bot: #05070c;
+  --foreground: #f8fafc;
+}
+
+body {
+  color: var(--foreground);
+  background: radial-gradient(130% 120% at 50% 0%, var(--canvas-top) 0%, var(--canvas-mid) 50%, var(--canvas-bot) 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Glassmorphism helpers */
+.glass-panel {
+  background: rgba(220, 225, 233, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.glass-pill {
+  background: rgba(220, 225, 233, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 14px 0 rgba(15, 23, 42, 0.08);
+}
+
+/* 
+ * =========================================================================
+ * TONED-DOWN LIGHT THEME (Soothing Studio Matte - No Stark White Glare)
+ * =========================================================================
+ */
+html:not(.dark) header {
+  background-color: rgba(165, 173, 186, 0.75) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+html:not(.dark) .bg-white\/95,
+html:not(.dark) .bg-white\/90,
+html:not(.dark) .bg-white\/80,
+html:not(.dark) .bg-white\/70,
+html:not(.dark) .bg-white\/60,
+html:not(.dark) .bg-white\/50,
+html:not(.dark) .bg-white {
+  background-color: rgba(220, 225, 233, 0.72) !important;
+}
+
+html:not(.dark) .border-white\/90,
+html:not(.dark) .border-white\/80,
+html:not(.dark) .border-white\/60,
+html:not(.dark) .border-white {
+  border-color: rgba(255, 255, 255, 0.45) !important;
+}
+
+html:not(.dark) .border-gray-100,
+html:not(.dark) .border-gray-200,
+html:not(.dark) .border-gray-200\/80,
+html:not(.dark) .border-gray-200\/60,
+html:not(.dark) .border-gray-300 {
+  border-color: rgba(148, 163, 184, 0.4) !important;
+}
+
+html:not(.dark) .bg-gray-50,
+html:not(.dark) .bg-gray-50\/80,
+html:not(.dark) .bg-gray-50\/70,
+html:not(.dark) .bg-gray-100 {
+  background-color: rgba(154, 163, 176, 0.28) !important;
+}
+
+html:not(.dark) input,
+html:not(.dark) textarea {
+  background-color: rgba(206, 212, 221, 0.8) !important;
+  border-color: rgba(140, 153, 172, 0.6) !important;
+  color: #0f172a !important;
+}
+
+html:not(.dark) input:focus,
+html:not(.dark) textarea:focus {
+  background-color: rgba(218, 223, 231, 0.95) !important;
+  border-color: #ea580c !important;
+}
+
+html:not(.dark) .bg-emerald-50,
+html:not(.dark) .bg-emerald-50\/70 {
+  background-color: rgba(167, 243, 208, 0.35) !important;
+  border-color: rgba(5, 150, 105, 0.4) !important;
+}
+
+html:not(.dark) .bg-orange-50,
+html:not(.dark) .bg-orange-50\/70 {
+  background-color: rgba(254, 215, 170, 0.4) !important;
+  border-color: rgba(234, 88, 12, 0.4) !important;
+}
+
+html:not(.dark) .bg-blue-50 {
+  background-color: rgba(191, 219, 254, 0.4) !important;
+  border-color: rgba(37, 99, 235, 0.4) !important;
+}
+
+/* 
+ * =========================================================================
+ * DARK THEME (Preserved as requested)
+ * =========================================================================
+ */
+.dark .bg-white\/95,
+.dark .bg-white\/90,
+.dark .bg-white\/80,
+.dark .bg-white\/70,
+.dark .bg-white\/60,
+.dark .bg-white\/50,
+.dark .bg-white {
+  background-color: rgba(18, 24, 38, 0.82) !important;
+}
+
+.dark .border-white\/90,
+.dark .border-white\/80,
+.dark .border-white\/60,
+.dark .border-white {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-200\/80,
+.dark .border-gray-200\/60,
+.dark .border-gray-300 {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.dark .text-gray-950,
+.dark .text-gray-900 {
+  color: #f8fafc !important;
+}
+
+.dark .text-gray-800,
+.dark .text-gray-700 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-gray-600,
+.dark .text-gray-500 {
+  color: #94a3b8 !important;
+}
+
+.dark .bg-gray-50,
+.dark .bg-gray-50\/80,
+.dark .bg-gray-50\/70,
+.dark .bg-gray-100 {
+  background-color: rgba(28, 36, 54, 0.6) !important;
+}
+
+.dark .bg-gray-950 {
+  background-color: #f8fafc !important;
+  color: #0b0f17 !important;
+}
+
+.dark .bg-gray-950:hover {
+  background-color: #ffffff !important;
+}
+
+.dark input,
+.dark textarea {
+  background-color: rgba(15, 20, 32, 0.9) !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.dark input:focus,
+.dark textarea:focus {
+  border-color: #f97316 !important;
+}
