@@ -1,12 +1,14 @@
 -- ============================================================
 -- Echoed Database Schema
--- PostgreSQL 16 + pgvector
+-- PostgreSQL 16 + pgvector + pg_trgm
 -- ============================================================
 
 -- Enable the pgvector extension (requires shared_preload_libraries = 'pgvector')
 CREATE EXTENSION IF NOT EXISTS vector;
 -- Enable pgcrypto for gen_random_uuid()
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- Enable pg_trgm for fast non-ML trigram text similarity (Stage 1 Recall)
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- ============================================================
 -- 1. USERS
@@ -26,13 +28,13 @@ CREATE INDEX idx_users_cognito_sub ON users(cognito_sub);
 -- ============================================================
 -- 2. POSTS (Private Experiences)
 -- Every submitted experience. Private by default.
--- The embedding vector is stored alongside the text.
 -- ============================================================
 CREATE TABLE IF NOT EXISTS posts (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title           VARCHAR(200),                    -- Experience Title (optional summary)
     body            TEXT NOT NULL,                   -- The raw private story
-    embedding       vector(1024),                    -- 1024-dim for AWS Bedrock Titan Embeddings V2
+    embedding       vector(1024),                    -- Optional vector storage
     status          VARCHAR(20) NOT NULL DEFAULT 'active'
                     CHECK (status IN ('active', 'archived', 'flagged')),
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -41,11 +43,9 @@ CREATE TABLE IF NOT EXISTS posts (
 
 CREATE INDEX idx_posts_user_id ON posts(user_id);
 CREATE INDEX idx_posts_status ON posts(status);
--- IVFFlat index for fast vector similarity search (build after inserting some data)
--- We use cosine distance operator <=>
-CREATE INDEX idx_posts_embedding ON posts
-    USING ivfflat (embedding vector_cosine_ops)
-    WITH (lists = 100);
+-- GIN Trigram indexes for fast Stage 1 candidate recall (sub-millisecond string math)
+CREATE INDEX IF NOT EXISTS idx_posts_body_trgm ON posts USING gin (body gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_posts_title_trgm ON posts USING gin (title gin_trgm_ops);
 
 -- ============================================================
 -- 3. CLUSTERS (Verified Match Groups)
@@ -151,14 +151,14 @@ CREATE TABLE IF NOT EXISTS anonymous_aliases (
 
 -- ============================================================
 -- 9. NOTIFICATIONS
--- Private notifications sent to users when their post is matched.
+-- Private notifications sent to users when their post is matched or submitted.
 -- ============================================================
 CREATE TABLE IF NOT EXISTS notifications (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    cluster_id      UUID NOT NULL REFERENCES clusters(id) ON DELETE CASCADE,
+    cluster_id      UUID REFERENCES clusters(id) ON DELETE CASCADE, -- Nullable for user submission confirmations
     type            VARCHAR(30) NOT NULL DEFAULT 'match_found'
-                    CHECK (type IN ('match_found', 'thread_published', 'new_consent')),
+                    CHECK (type IN ('match_found', 'thread_published', 'new_consent', 'post_sent')),
     title           VARCHAR(300),
     message         TEXT,
     is_read         BOOLEAN NOT NULL DEFAULT FALSE,
@@ -169,7 +169,7 @@ CREATE INDEX idx_notifications_user ON notifications(user_id);
 CREATE INDEX idx_notifications_user_unread ON notifications(user_id, is_read) WHERE is_read = FALSE;
 
 -- ============================================================
--- 10. CANDIDATE MATCHES (Stage 1 Vector Search Results)
+-- 10. CANDIDATE MATCHES (Stage 1 Vector / Text Search Results)
 -- Tracks which posts were found as similar before LLM verification.
 -- Useful for debugging and audit trail.
 -- ============================================================
@@ -177,7 +177,7 @@ CREATE TABLE IF NOT EXISTS candidate_matches (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     source_post_id  UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
     matched_post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
-    cosine_distance REAL NOT NULL,                    -- Lower = more similar
+    cosine_distance REAL NOT NULL,                    -- Distance metric (1 - similarity)
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     UNIQUE(source_post_id, matched_post_id)

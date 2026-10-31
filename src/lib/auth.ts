@@ -35,11 +35,17 @@ export async function syncCognitoUserToDb(
   return result.rows[0];
 }
 
+// React.cache is available in RSC; in standalone Node CLI scripts it falls back to a passthrough
+const safeCache =
+  typeof cache === "function"
+    ? cache
+    : <T extends (...args: any[]) => any>(fn: T): T => fn;
+
 /**
  * Reads the session cookie and verifies the user.
  * Returns the PostgreSQL user record if authenticated, or null if unauthenticated.
  */
-export const getSessionUser = cache(async (): Promise<User | null> => {
+export const getSessionUser = safeCache(async (): Promise<User | null> => {
   try {
     const cookieStore = cookies();
     const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;

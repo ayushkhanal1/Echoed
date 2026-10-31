@@ -2,6 +2,9 @@
   "name": "echoed",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=18.17.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -13,6 +16,9 @@
     "test:auth": "tsx src/db/test-auth.ts",
     "test:submission": "tsx src/db/test-submission.ts",
     "test:similarity": "tsx src/db/test-similarity.ts",
+    "test:pipeline": "tsx src/db/test-pipeline.ts",
+    "test:baseten": "tsx src/db/test-baseten.ts",
+    "test:features": "tsx src/db/test-all-features.ts",
     "db:seed-mock": "tsx src/db/seed-mock.ts",
     "db:clean-mock": "tsx src/db/clean-mock.ts"
   },

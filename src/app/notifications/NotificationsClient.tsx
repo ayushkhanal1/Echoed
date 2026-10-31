@@ -80,7 +80,7 @@ export default function NotificationsClient({
             Notifications & Connections
           </h1>
           <p className="text-xs sm:text-sm text-gray-500 mt-1">
-            Review match confirmations, accept connections with matching authors, and track submissions.
+            Review match confirmations, manage visibility in shared groups, and track your experiences.
           </p>
         </div>
 
@@ -126,7 +126,7 @@ export default function NotificationsClient({
                 }`}
               >
                 <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-3.5">
+                  <div className="flex items-start gap-3.5 w-full">
                     <div
                       className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-base shrink-0 ${
                         isMatchRequest
@@ -137,7 +137,7 @@ export default function NotificationsClient({
                       {isMatchRequest ? "✨" : "✓"}
                     </div>
 
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 flex-1">
                       <div className="flex items-center gap-2">
                         <h4 className="text-base font-bold text-gray-950 font-serif">
                           {notif.title || (isMatchRequest ? "Parallel Experience Match Found!" : "Confirmation")}
@@ -151,7 +151,7 @@ export default function NotificationsClient({
                         {notif.message}
                       </p>
 
-                      {/* Match Request Card & Connection Acceptance */}
+                      {/* Match Request Card & Flexible Visibility Toggle */}
                       {isMatchRequest && notif.cluster_id && (
                         <div className="mt-4 p-4 rounded-2xl bg-orange-50/70 border border-orange-200/60 space-y-3">
                           {notif.thread_title && (
@@ -165,23 +165,41 @@ export default function NotificationsClient({
                             </p>
                           )}
 
-                          {/* Action Buttons */}
+                          {/* Independent Author Visibility Controls */}
                           {notif.consent_status === "accepted" ? (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
-                              ✓ You Accepted Connection (Waiting for partner or published)
-                            </span>
+                            <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-orange-200/40">
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
+                                ✓ Opted-In to Public Thread
+                              </span>
+                              <button
+                                onClick={() => handleConsentAction(notif.cluster_id!, "decline")}
+                                disabled={actingId === notif.cluster_id}
+                                className="text-xs text-gray-500 hover:text-rose-600 underline transition-colors"
+                              >
+                                Switch to Private (opt-out)
+                              </button>
+                            </div>
                           ) : notif.consent_status === "declined" ? (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-xs font-semibold">
-                              ✕ Connection Declined (Post remains private)
-                            </span>
+                            <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-orange-200/40">
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-xs font-semibold">
+                                🔒 Kept Private to You Only
+                              </span>
+                              <button
+                                onClick={() => handleConsentAction(notif.cluster_id!, "accept")}
+                                disabled={actingId === notif.cluster_id}
+                                className="text-xs text-orange-600 hover:text-orange-700 underline font-medium transition-colors"
+                              >
+                                Share in Public Thread (opt-in) →
+                              </button>
+                            </div>
                           ) : (
-                            <div className="flex items-center gap-3 pt-1">
+                            <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-orange-200/40">
                               <button
                                 onClick={() => handleConsentAction(notif.cluster_id!, "accept")}
                                 disabled={actingId === notif.cluster_id}
                                 className="px-4 py-2 rounded-full bg-gray-950 hover:bg-black text-white text-xs font-semibold transition-all shadow-sm disabled:opacity-50"
                               >
-                                {actingId === notif.cluster_id ? "Saving..." : "Accept & Publish Connection →"}
+                                {actingId === notif.cluster_id ? "Saving..." : "Share in Public Thread (Opt-In) →"}
                               </button>
                               <button
                                 onClick={() => handleConsentAction(notif.cluster_id!, "decline")}

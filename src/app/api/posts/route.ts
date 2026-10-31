@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
-import { generateEmbedding, formatVectorForPg } from "@/lib/ai/embedding";
 import { findSimilarExperiences } from "@/lib/ai/similarity";
+import { verifyAndClusterMatches, VerifiedClusterResult } from "@/lib/ai/verification";
 import { db } from "@/db";
 
 export async function POST(request: Request) {
@@ -41,37 +41,48 @@ export async function POST(request: Request) {
       );
     }
 
-    // Step 1: Generate 1024-dimensional vector embedding via AWS Bedrock Titan V2
-    const embedding = await generateEmbedding(trimmedBody);
-    const vectorString = formatVectorForPg(embedding);
-
-    // Step 2: Store private post & vector in PostgreSQL
-    const query = `
-      INSERT INTO posts (user_id, title, body, embedding, status)
-      VALUES ($1, $2, $3, $4::vector, 'active')
+    // Step 1: Store private post securely in PostgreSQL
+    const insertQuery = `
+      INSERT INTO posts (user_id, title, body, status)
+      VALUES ($1, $2, $3, 'active')
       RETURNING id, user_id, title, body, status, created_at;
     `;
 
-    const result = await db.query(query, [user.id, trimmedTitle, trimmedBody, vectorString]);
+    const result = await db.query(insertQuery, [user.id, trimmedTitle, trimmedBody]);
     const post = result.rows[0];
 
-    // Log a submission confirmation notification for the user
-    await db.query(`
-      INSERT INTO notifications (user_id, type, title, message)
-      VALUES ($1, 'post_sent', 'Experience Saved Privately', $2);
-    `, [
-      user.id,
-      trimmedTitle 
-        ? `Your experience "${trimmedTitle}" has been embedded and stored securely.`
-        : "Your experience has been embedded and stored securely.",
-    ]);
+    // Log a private submission confirmation notification for the user
+    await db.query(
+      `INSERT INTO notifications (user_id, type, title, message)
+       VALUES ($1, 'post_sent', 'Experience Saved Privately', $2);`,
+      [
+        user.id,
+        trimmedTitle
+          ? `Your experience "${trimmedTitle}" has been saved in your private vault.`
+          : "Your experience has been saved in your private vault.",
+      ]
+    );
 
-    // Step 3: Run Stage 1 Recall — Dynamic Vector Similarity Search across all other users' posts
+    // Step 2: Stage 1 Recall — Fast Trigram String Math Search (Non-ML, 100% Rule-Proof)
     const candidates = await findSimilarExperiences(
       post.id,
-      embedding,
+      trimmedBody,
       user.id
     );
+
+    // Step 3: Stage 2 Verification — Meta LLM Coincidence Verification & Cluster Creation
+    let verifiedClusters: VerifiedClusterResult[] = [];
+    if (candidates.length > 0) {
+      verifiedClusters = await verifyAndClusterMatches(
+        {
+          id: post.id,
+          userId: user.id,
+          title: trimmedTitle,
+          body: trimmedBody,
+        },
+        candidates
+      );
+    }
 
     return NextResponse.json(
       {
@@ -79,23 +90,29 @@ export async function POST(request: Request) {
         post: {
           id: post.id,
           userId: post.user_id,
+          title: post.title,
           body: post.body,
           status: post.status,
           createdAt: post.created_at,
-          embeddingDimensions: embedding.length,
         },
         stage1Recall: {
           candidateCount: candidates.length,
           candidates: candidates.map((c) => ({
             id: c.id,
-            cosineDistance: c.cosineDistance,
+            title: c.title,
             similarityScore: Math.round(c.similarityScore * 100) + "%",
           })),
         },
+        stage2Verification: {
+          verifiedMatchCount: verifiedClusters.length,
+          clusters: verifiedClusters,
+        },
         message:
-          candidates.length > 0
-            ? `Experience saved. Found ${candidates.length} matching candidate(s) crossing the similarity threshold.`
-            : "Experience saved privately. Awaiting similar submissions from other users.",
+          verifiedClusters.length > 0
+            ? `Experience saved! Meta AI verified a match with an existing story. Check your notifications to review the connection.`
+            : candidates.length > 0
+            ? `Experience saved. Found ${candidates.length} candidate(s); waiting for closer matching submissions.`
+            : "Experience saved privately in your vault. Awaiting matching submissions from other authors.",
       },
       { status: 201 }
     );
@@ -120,7 +137,7 @@ export async function GET() {
     }
 
     const query = `
-      SELECT id, title, body, status, created_at, (embedding IS NOT NULL) AS is_embedded
+      SELECT id, title, body, status, created_at, true AS is_embedded
       FROM posts
       WHERE user_id = $1
       ORDER BY created_at DESC;

@@ -54,6 +54,33 @@ export default function ProfileClient({
 
   // Active History Tab
   const [activeTab, setActiveTab] = useState<"unmatched" | "matched">("unmatched");
+  const [matches, setMatches] = useState<MatchItem[]>(matchedThreads);
+  const [actingClusterId, setActingClusterId] = useState<string | null>(null);
+
+  const handleConsentToggle = async (clusterId: string, action: "accept" | "decline") => {
+    setActingClusterId(clusterId);
+    try {
+      const res = await fetch("/api/consent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clusterId, action }),
+      });
+      if (res.ok) {
+        setMatches((prev) =>
+          prev.map((m) =>
+            m.cluster_id === clusterId
+              ? { ...m, consent_status: action === "accept" ? "accepted" : "declined" }
+              : m
+          )
+        );
+        router.refresh();
+      }
+    } catch (err) {
+      console.error("Failed to update consent:", err);
+    } finally {
+      setActingClusterId(null);
+    }
+  };
 
   const handleSaveUsername = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -185,7 +212,7 @@ export default function ProfileClient({
           <div className="p-4 rounded-2xl bg-gray-50/70 border border-gray-100">
             <span className="text-xs text-gray-500 block">Matched Threads</span>
             <span className="text-xl font-bold text-orange-600 font-serif">
-              {matchedThreads.length}
+              {matches.length}
             </span>
           </div>
           <div className="p-4 rounded-2xl bg-gray-50/70 border border-gray-100 col-span-2 sm:col-span-1">
@@ -221,7 +248,7 @@ export default function ProfileClient({
                   : "text-gray-500 hover:text-gray-950 hover:bg-gray-100"
               }`}
             >
-              ✨ Matched Threads ({matchedThreads.length})
+              ✨ Matched Threads ({matches.length})
             </button>
           </div>
 
@@ -243,7 +270,7 @@ export default function ProfileClient({
                   No private experiences yet
                 </h4>
                 <p className="text-xs text-gray-500 max-w-sm mx-auto">
-                  Share a coincidence, unusual pattern, or strange observation. It will be stored safely in your private vault while our vector engine searches for matches.
+                  Share a coincidence, unusual pattern, or strange observation. It will be stored safely in your private vault while our Meta AI engine searches for verified matches.
                 </p>
                 <Link
                   href="/submit"
@@ -263,11 +290,9 @@ export default function ProfileClient({
                       <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200">
                         🔒 100% Private
                       </span>
-                      {post.is_embedded && (
-                        <span className="px-2.5 py-0.5 rounded-full bg-orange-50 text-orange-800 font-medium border border-orange-200">
-                          🧮 1024-dim Vector Indexed
-                        </span>
-                      )}
+                      <span className="px-2.5 py-0.5 rounded-full bg-orange-50 text-orange-800 font-medium border border-orange-200">
+                        ⚡ Search Indexed
+                      </span>
                     </div>
                     <span className="text-gray-400 font-mono text-[11px]">
                       {new Date(post.created_at).toLocaleDateString()}
@@ -298,21 +323,21 @@ export default function ProfileClient({
         {/* Tab 2: Matched Threads */}
         {activeTab === "matched" && (
           <div className="space-y-4">
-            {matchedThreads.length === 0 ? (
+            {matches.length === 0 ? (
               <div className="rounded-3xl border border-dashed border-gray-300 bg-white/50 p-10 text-center space-y-3">
                 <span className="text-3xl block">🔮</span>
                 <h4 className="text-base font-bold text-gray-950 font-serif">
                   No matched threads yet
                 </h4>
                 <p className="text-xs text-gray-500 max-w-sm mx-auto">
-                  When another user submits an experience that matches yours and you both consent, your shared experience thread will appear here.
+                  When another user submits an experience that matches yours and you choose to share, your shared experience thread will appear here.
                 </p>
               </div>
             ) : (
-              matchedThreads.map((m) => (
+              matches.map((m) => (
                 <div
                   key={m.membership_id}
-                  className="rounded-3xl bg-white/90 backdrop-blur-xl border border-white/90 p-6 shadow-sm space-y-3"
+                  className="rounded-3xl bg-white/90 backdrop-blur-xl border border-white/90 p-6 shadow-sm space-y-4"
                 >
                   <div className="flex items-center justify-between text-xs pb-2 border-b border-gray-100">
                     <span className="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800 font-bold">
@@ -323,18 +348,59 @@ export default function ProfileClient({
                     </span>
                   </div>
 
-                  <h4 className="text-lg font-bold text-gray-950 font-serif">
-                    {m.thread_title || "Shared Experience Thread"}
-                  </h4>
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-950 font-serif">
+                      {m.thread_title || "Shared Experience Thread"}
+                    </h4>
+                    {m.preview_summary && (
+                      <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                        {m.preview_summary}
+                      </p>
+                    )}
+                  </div>
 
-                  {m.preview_summary && (
-                    <p className="text-xs sm:text-sm text-gray-600">
-                      {m.preview_summary}
-                    </p>
-                  )}
+                  {/* Independent Author Visibility Controls */}
+                  <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-500 font-medium">Your Visibility:</span>
+                      {m.consent_status === "accepted" ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
+                          ✓ Opted-In (Public Thread)
+                        </span>
+                      ) : m.consent_status === "declined" ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gray-200 text-gray-700 text-xs font-semibold">
+                          🔒 Kept Private
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">
+                          ⏳ Consent Pending
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {m.consent_status === "accepted" ? (
+                        <button
+                          onClick={() => handleConsentToggle(m.cluster_id, "decline")}
+                          disabled={actingClusterId === m.cluster_id}
+                          className="text-xs text-gray-500 hover:text-rose-600 underline font-medium transition-colors disabled:opacity-50"
+                        >
+                          {actingClusterId === m.cluster_id ? "Updating..." : "Switch to Private (opt-out)"}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleConsentToggle(m.cluster_id, "accept")}
+                          disabled={actingClusterId === m.cluster_id}
+                          className="text-xs text-orange-600 hover:text-orange-700 underline font-medium transition-colors disabled:opacity-50"
+                        >
+                          {actingClusterId === m.cluster_id ? "Updating..." : "Share in Public Thread (opt-in) →"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
 
                   {m.thread_id && (
-                    <div className="pt-2 flex items-center justify-between">
+                    <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
                       <Link
                         href={`/thread/${m.thread_id}`}
                         className="text-xs font-bold text-orange-600 hover:text-orange-700"

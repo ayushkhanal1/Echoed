@@ -1,10 +1,10 @@
-// Echoed — Layer 4 Verification Test (Dynamic Vector Similarity Search)
+// Echoed — Layer 4 Verification Test (Non-ML Trigram Similarity Search)
 // Usage: npm run test:similarity
 //
 // Tests:
-//   1. Generates 1024-dim embeddings for two semantically similar coincidence stories
-//   2. Generates embedding for one completely unrelated story
-//   3. Runs pgvector dynamic threshold cosine search (<=> operator)
+//   1. Submits two semantically similar coincidence stories (User Alpha & User Beta)
+//   2. Submits one completely unrelated story (User Gamma)
+//   3. Runs PostgreSQL pg_trgm dynamic threshold search
 //   4. Verifies positive match recall between similar stories
 //   5. Verifies negative filtering of unrelated story (0 false positives)
 //   6. Verifies audit logging in candidate_matches table
@@ -13,14 +13,13 @@
 import * as dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
-import { generateEmbedding, formatVectorForPg } from "../lib/ai/embedding";
 import { findSimilarExperiences } from "../lib/ai/similarity";
 import { syncCognitoUserToDb } from "../lib/auth";
 import { db } from "./index";
 
 async function runSimilarityTest() {
   console.log("=".repeat(65));
-  console.log("  ECHOED — Layer 4 Dynamic Vector Similarity Search Test");
+  console.log("  ECHOED — Layer 4 Stage 1 Non-ML Trigram Search Test");
   console.log("=".repeat(65));
 
   const cleanupUserIds: string[] = [];
@@ -54,11 +53,10 @@ async function runSimilarityTest() {
     console.log("\n📝 Step 2: User Alpha submits Story A (Window knocks coincidence)...");
     const storyA =
       "Every year in mid-October at precisely 11:11 PM, I hear three distinct knocks on my bedroom window even though I live on the fourth floor.";
-    const vectorA = await generateEmbedding(storyA);
     const postA = (
       await db.query(
-        "INSERT INTO posts (user_id, body, embedding, status) VALUES ($1, $2, $3::vector, 'active') RETURNING id;",
-        [userA.id, storyA, formatVectorForPg(vectorA)]
+        "INSERT INTO posts (user_id, body, status) VALUES ($1, $2, 'active') RETURNING id;",
+        [userA.id, storyA]
       )
     ).rows[0];
     cleanupPostIds.push(postA.id);
@@ -68,11 +66,10 @@ async function runSimilarityTest() {
     console.log("\n🥖 Step 3: User Gamma submits Story C (Unrelated sourdough baking)...");
     const storyC =
       "I spent the entire weekend learning how to bake artisan sourdough bread from scratch using organic whole wheat flour and wild yeast.";
-    const vectorC = await generateEmbedding(storyC);
     const postC = (
       await db.query(
-        "INSERT INTO posts (user_id, body, embedding, status) VALUES ($1, $2, $3::vector, 'active') RETURNING id;",
-        [userC.id, storyC, formatVectorForPg(vectorC)]
+        "INSERT INTO posts (user_id, body, status) VALUES ($1, $2, 'active') RETURNING id;",
+        [userC.id, storyC]
       )
     ).rows[0];
     cleanupPostIds.push(postC.id);
@@ -82,22 +79,21 @@ async function runSimilarityTest() {
     console.log("\n🔍 Step 4: User Beta submits Story B (Matching window knocks) and triggers Stage 1 Search...");
     const storyB =
       "I live in an upper floor apartment and around mid-October at 11:11 PM at night, there are always three loud knocks right against my window glass.";
-    const vectorB = await generateEmbedding(storyB);
     const postB = (
       await db.query(
-        "INSERT INTO posts (user_id, body, embedding, status) VALUES ($1, $2, $3::vector, 'active') RETURNING id;",
-        [userB.id, storyB, formatVectorForPg(vectorB)]
+        "INSERT INTO posts (user_id, body, status) VALUES ($1, $2, 'active') RETURNING id;",
+        [userB.id, storyB]
       )
     ).rows[0];
     cleanupPostIds.push(postB.id);
     console.log(`   ✅ Post B created: ${postB.id}`);
 
     // Run Stage 1 Dynamic Recall Search
-    const threshold = 0.58;
-    console.log(`\n🧮 Step 5: Executing findSimilarExperiences() with threshold <= ${threshold}...`);
+    const threshold = 0.18;
+    console.log(`\n🧮 Step 5: Executing findSimilarExperiences() with threshold >= ${threshold}...`);
     const candidates = await findSimilarExperiences(
       postB.id,
-      vectorB,
+      storyB,
       userB.id,
       threshold
     );
@@ -105,7 +101,7 @@ async function runSimilarityTest() {
     console.log(`   Candidates retrieved: ${candidates.length}`);
     candidates.forEach((c, idx) => {
       console.log(
-        `   [Match #${idx + 1}] Post ID: ${c.id.substring(0, 8)}... | Distance: ${c.cosineDistance.toFixed(4)} | Score: ${(c.similarityScore * 100).toFixed(1)}%`
+        `   [Match #${idx + 1}] Post ID: ${c.id.substring(0, 8)}... | Score: ${(c.similarityScore * 100).toFixed(1)}%`
       );
       console.log(`               Snippet: "${c.body.substring(0, 75)}..."`);
     });
