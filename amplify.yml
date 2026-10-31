@@ -6,6 +6,7 @@ frontend:
         - npm install
     build:
       commands:
+        - node scripts/build-env.js
         - npm run build
   artifacts:
     baseDirectory: .next
