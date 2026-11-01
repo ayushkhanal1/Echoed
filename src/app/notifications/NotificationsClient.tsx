@@ -264,18 +264,18 @@ export default function NotificationsClient({
                               </button>
                             </div>
                           ) : (
-                            <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-orange-200/50">
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-2 border-t border-orange-200/50">
                               <button
                                 onClick={() => handleConsentAction(notif.cluster_id!, "accept")}
                                 disabled={actingId === notif.cluster_id}
-                                className="px-5 py-2.5 rounded-full bg-gray-950 hover:bg-black text-white text-xs font-semibold transition-all shadow-sm disabled:opacity-50"
+                                className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-gray-950 hover:bg-black text-white text-xs font-semibold transition-all shadow-sm disabled:opacity-50 text-center"
                               >
                                 {actingId === notif.cluster_id ? "Saving..." : "✓ Confirm Authenticity & Share Publicly →"}
                               </button>
                               <button
                                 onClick={() => handleConsentAction(notif.cluster_id!, "decline")}
                                 disabled={actingId === notif.cluster_id}
-                                className="px-4 py-2.5 rounded-full border border-gray-300 hover:bg-gray-100 text-gray-700 text-xs font-semibold transition-all disabled:opacity-50"
+                                className="w-full sm:w-auto px-4 py-2.5 rounded-full border border-gray-300 hover:bg-gray-100 text-gray-700 text-xs font-semibold transition-all disabled:opacity-50 text-center"
                               >
                                 Keep 100% Private
                               </button>

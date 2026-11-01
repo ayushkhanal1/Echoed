@@ -81,7 +81,7 @@ export default function SubmitClient() {
       </div>
 
       {/* Main Form Card */}
-      <div className="rounded-3xl bg-white/90 backdrop-blur-2xl border border-white/90 p-8 shadow-sm space-y-6">
+      <div className="rounded-3xl bg-white/90 backdrop-blur-2xl border border-white/90 p-5 sm:p-8 shadow-sm space-y-6">
         {/* Privacy Highlight */}
         <div className="flex items-center justify-between p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/60 text-xs text-emerald-800 font-medium">
           <div className="flex items-center gap-2">

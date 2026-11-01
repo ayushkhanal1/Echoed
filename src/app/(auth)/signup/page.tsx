@@ -169,7 +169,7 @@ export default function SignupPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-lg rounded-3xl bg-white/80 backdrop-blur-2xl border border-white/80 p-8 sm:p-10 shadow-xl shadow-gray-200/50">
+      <div className="w-full max-w-lg rounded-3xl bg-white/80 backdrop-blur-2xl border border-white/80 p-5 sm:p-10 shadow-xl shadow-gray-200/50">
         {/* Header with official logo */}
         <div className="text-center">
           <Link href="/" className="inline-block mb-3 hover:opacity-90 transition-opacity">

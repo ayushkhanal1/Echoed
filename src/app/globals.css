@@ -48,9 +48,10 @@ body {
  * TONED-DOWN LIGHT THEME (Soothing Studio Matte - No Stark White Glare)
  * =========================================================================
  */
-html:not(.dark) header {
-  background-color: rgba(165, 173, 186, 0.75) !important;
-  border-bottom-color: rgba(255, 255, 255, 0.3) !important;
+html:not(.dark) header,
+html:not(.dark) nav[aria-label="Mobile Navigation"] {
+  background-color: rgba(165, 173, 186, 0.88) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
 html:not(.dark) .bg-white\/95,
@@ -120,6 +121,12 @@ html:not(.dark) .bg-blue-50 {
  * DARK THEME (Preserved as requested)
  * =========================================================================
  */
+.dark header,
+.dark nav[aria-label="Mobile Navigation"] {
+  background-color: rgba(16, 22, 34, 0.92) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
 .dark .bg-white\/95,
 .dark .bg-white\/90,
 .dark .bg-white\/80,

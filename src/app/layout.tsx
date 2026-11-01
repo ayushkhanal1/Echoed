@@ -1,6 +1,12 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export const metadata: Metadata = {
   title: "Echoed — Discover Shared Human Coincidences",
@@ -40,7 +46,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen text-gray-900 dark:text-gray-100 antialiased flex flex-col selection:bg-brand-500 selection:text-white transition-colors duration-200">
         <Navbar />
-        <div className="flex-1">{children}</div>
+        <div className="flex-1 pb-24 md:pb-0">{children}</div>
       </body>
     </html>
   );

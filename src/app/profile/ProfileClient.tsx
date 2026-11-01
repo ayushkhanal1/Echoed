@@ -133,7 +133,7 @@ export default function ProfileClient({
   return (
     <main className="mx-auto max-w-5xl px-4 sm:px-8 py-10 sm:py-14 space-y-10">
       {/* Profile Overview Card */}
-      <div className="rounded-3xl bg-white/90 backdrop-blur-2xl border border-white/90 p-8 shadow-sm">
+      <div className="rounded-3xl bg-white/90 backdrop-blur-2xl border border-white/90 p-5 sm:p-8 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-gray-100">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-400 text-white flex items-center justify-center font-bold text-2xl shadow-sm">
@@ -236,11 +236,11 @@ export default function ProfileClient({
 
       {/* Post History Tabs */}
       <div className="space-y-6">
-        <div className="flex items-center justify-between border-b border-gray-200 pb-3">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 pb-3">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => setActiveTab("unmatched")}
-              className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all ${
                 activeTab === "unmatched"
                   ? "bg-gray-950 text-white shadow-sm"
                   : "text-gray-500 hover:text-gray-950 hover:bg-gray-100"
@@ -251,7 +251,7 @@ export default function ProfileClient({
 
             <button
               onClick={() => setActiveTab("matched")}
-              className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all ${
                 activeTab === "matched"
                   ? "bg-gray-950 text-white shadow-sm"
                   : "text-gray-500 hover:text-gray-950 hover:bg-gray-100"

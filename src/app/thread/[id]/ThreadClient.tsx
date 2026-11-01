@@ -143,7 +143,7 @@ export default function ThreadClient({
       </div>
 
       {/* Main Thread Header Card */}
-      <div className="rounded-3xl bg-white/90 backdrop-blur-2xl border border-white/90 p-8 sm:p-10 shadow-sm space-y-6">
+      <div className="rounded-3xl bg-white/90 backdrop-blur-2xl border border-white/90 p-5 sm:p-10 shadow-sm space-y-6">
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-orange-50 border border-orange-200/80 text-orange-800 font-semibold text-xs shadow-sm">
             <span>✦</span> Meta AI Verified Coincidence
@@ -156,11 +156,11 @@ export default function ThreadClient({
           </span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-950 font-serif leading-tight">
+        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-gray-950 font-serif leading-tight">
           {thread.title}
         </h1>
 
-        <p className="text-base sm:text-lg text-gray-700 font-medium leading-relaxed bg-amber-50/50 p-5 rounded-2xl border border-amber-200/40">
+        <p className="text-sm sm:text-lg text-gray-700 font-medium leading-relaxed bg-amber-50/50 p-4 sm:p-5 rounded-2xl border border-amber-200/40">
           &ldquo;{thread.preview_summary}&rdquo;
         </p>
 
