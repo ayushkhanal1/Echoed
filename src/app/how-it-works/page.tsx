@@ -39,7 +39,7 @@ export default function HowItWorksPage() {
               Write & Submit in 100% Privacy
             </h3>
             <p className="text-sm text-gray-600 leading-relaxed">
-              When you write an experience, it is <strong>never published publicly</strong>. Instead, AWS Bedrock instantly converts your text into a mathematical vector (a numerical fingerprint of the meaning). Your raw text stays private in your account.
+              When you write an experience, it is <strong>never published publicly</strong>. It is stored securely in your private encrypted vault. Your raw text stays strictly private to your account until you choose to connect.
             </p>
             <div className="inline-flex items-center gap-2 pt-2 text-xs font-semibold text-emerald-700">
               <span>🔒 Default is always private — no one can browse or search your private stories.</span>
@@ -57,10 +57,10 @@ export default function HowItWorksPage() {
               AI Discovers Parallel Experiences
             </h3>
             <p className="text-sm text-gray-600 leading-relaxed">
-              Our PostgreSQL vector search compares mathematical meanings—not just keywords. If someone described the exact same strange situation using completely different words, the AI spots the coincidence.
+              Our intelligent two-stage search engine evaluates contextual meanings and emotional patterns—not just keywords. If someone describes a similar uncanny experience using completely different words, the AI spots the connection.
             </p>
             <p className="text-sm text-gray-600 leading-relaxed">
-              Meta&apos;s intelligent AI then verifies the candidate match to filter out false positives and writes a neutral 1-sentence summary of what both stories have in common.
+              Meta AI then verifies the candidate match to filter out false positives and writes a neutral 1-sentence summary of what both stories have in common.
             </p>
           </div>
         </div>

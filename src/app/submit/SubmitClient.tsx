@@ -141,7 +141,7 @@ export default function SubmitClient() {
               <span>
                 {isMinimumMet ? (
                   <span className="text-emerald-600 font-medium">
-                    ✓ Ready for AWS Bedrock Titan vector embedding
+                    ✓ Ready for AI matching analysis
                   </span>
                 ) : (
                   <span>Minimum 15 characters ({15 - charCount} more needed)</span>
@@ -191,7 +191,7 @@ export default function SubmitClient() {
               {loading ? (
                 <>
                   <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Embedding with AWS Bedrock...</span>
+                  <span>Saving to private vault...</span>
                 </>
               ) : (
                 <span>Save Experience Privately →</span>

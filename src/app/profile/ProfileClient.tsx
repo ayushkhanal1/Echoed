@@ -114,8 +114,8 @@ export default function ProfileClient({
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
-      router.push("/");
-      router.refresh();
+      window.dispatchEvent(new Event("auth-change"));
+      window.location.href = "/";
     } catch (err) {
       console.error(err);
     }

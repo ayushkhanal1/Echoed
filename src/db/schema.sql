@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS notifications (
     user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     cluster_id      UUID REFERENCES clusters(id) ON DELETE CASCADE, -- Nullable for user submission confirmations
     type            VARCHAR(30) NOT NULL DEFAULT 'match_found'
-                    CHECK (type IN ('match_found', 'thread_published', 'new_consent', 'post_sent')),
+                    CHECK (type IN ('match_found', 'consent_request', 'thread_published', 'post_sent', 'match_joined')),
     title           VARCHAR(300),
     message         TEXT,
     is_read         BOOLEAN NOT NULL DEFAULT FALSE,

@@ -37,9 +37,16 @@ export default function Navbar() {
     }
   };
 
-  // Initial load: fetch user & unread count once
+  // Re-fetch auth on initial load and whenever pathname changes
   useEffect(() => {
     fetchAuth();
+  }, [pathname]);
+
+  // Listen for custom auth events triggered by login/signup/logout
+  useEffect(() => {
+    const handleAuthChange = () => fetchAuth();
+    window.addEventListener("auth-change", handleAuthChange);
+    return () => window.removeEventListener("auth-change", handleAuthChange);
   }, []);
 
   // When visiting notifications, immediately clear the badge
@@ -53,8 +60,8 @@ export default function Navbar() {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
       setUser(null);
-      router.push("/");
-      router.refresh();
+      window.dispatchEvent(new Event("auth-change"));
+      window.location.href = "/";
     } catch (err) {
       console.error("Logout failed:", err);
     }

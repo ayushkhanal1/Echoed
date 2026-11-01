@@ -46,8 +46,8 @@ function LoginForm() {
         throw new Error(data.error || "Login failed");
       }
 
-      router.push("/feed");
-      router.refresh();
+      window.dispatchEvent(new Event("auth-change"));
+      window.location.href = "/feed";
     } catch (err: any) {
       setError(err.message || "Invalid email or password");
     } finally {
