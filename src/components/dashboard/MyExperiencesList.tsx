@@ -40,7 +40,7 @@ export default function MyExperiencesList({ posts, loading }: ExperiencesListPro
           No private experiences submitted yet
         </h3>
         <p className="text-xs text-gray-500 max-w-sm mx-auto leading-relaxed">
-          When you write and submit an experience above, it will be vectorized and displayed here waiting for potential match clusters.
+          When you write and submit an experience above, it will be securely saved in your vault and displayed here waiting for potential match clusters.
         </p>
       </div>
     );
@@ -63,7 +63,7 @@ export default function MyExperiencesList({ posts, loading }: ExperiencesListPro
 
               {post.is_embedded && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-orange-50 text-orange-800 font-medium border border-orange-200/60">
-                  🧮 768-dim Vector Embedded
+                  ✦ Searching for Matches
                 </span>
               )}
             </div>

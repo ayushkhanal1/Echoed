@@ -288,10 +288,10 @@ export default function ProfileClient({
                   <div className="flex flex-wrap items-center justify-between gap-2 text-xs border-b border-gray-100 pb-2.5">
                     <div className="flex items-center gap-2">
                       <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200">
-                        🔒 100% Private
+                        🔒 100% Private Vault
                       </span>
                       <span className="px-2.5 py-0.5 rounded-full bg-orange-50 text-orange-800 font-medium border border-orange-200">
-                        ⚡ Search Indexed
+                        ✦ Searching for Matches
                       </span>
                     </div>
                     <span className="text-gray-400 font-mono text-[11px]">

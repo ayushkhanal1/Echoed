@@ -167,7 +167,7 @@ export default function ThreadClient({
         {thread.match_reasoning && (
           <div className="rounded-2xl bg-gray-50/80 border border-gray-200/80 p-4 space-y-1">
             <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">
-              Meta AI Semantic Analysis
+              Meta AI Match Analysis
             </span>
             <p className="text-xs text-gray-700 leading-relaxed">
               {thread.match_reasoning}

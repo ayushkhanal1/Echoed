@@ -54,7 +54,7 @@ export default function SubmitClient() {
         throw new Error(data.error || "Failed to submit post");
       }
 
-      setSuccess("Your experience has been securely saved and vectorized!");
+      setSuccess("Your experience has been securely saved to your private vault!");
       setTimeout(() => {
         router.push("/profile");
       }, 1500);

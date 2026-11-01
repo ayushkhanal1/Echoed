@@ -42,7 +42,7 @@ export default function SubmitExperienceForm({ onSubmitted }: SubmitFormProps) {
         throw new Error(data.error || "Failed to submit experience");
       }
 
-      setSuccess("Your experience has been securely saved and embedded into the vector index!");
+      setSuccess("Your experience has been securely saved to your private vault!");
       setBody("");
       onSubmitted();
     } catch (err: any) {
@@ -119,7 +119,7 @@ export default function SubmitExperienceForm({ onSubmitted }: SubmitFormProps) {
             <span>
               {isMinimumMet ? (
                 <span className="text-emerald-600 font-medium">
-                  ✓ Detailed enough for embedding
+                  ✓ Detailed enough for AI analysis
                 </span>
               ) : (
                 <span className="text-gray-400">
@@ -134,7 +134,7 @@ export default function SubmitExperienceForm({ onSubmitted }: SubmitFormProps) {
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-xs text-gray-500">
             <span>🔒</span>
-            <span>Vectorized upon submission. No raw text is ever publicly revealed.</span>
+            <span>Protected upon submission. No raw text is ever publicly revealed.</span>
           </div>
 
           <button
@@ -145,10 +145,10 @@ export default function SubmitExperienceForm({ onSubmitted }: SubmitFormProps) {
             {loading ? (
               <>
                 <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Embedding into Vector Index...</span>
+                <span>Saving to private vault...</span>
               </>
             ) : (
-              <span>Save & Embed Privately →</span>
+              <span>Save Experience Privately →</span>
             )}
           </button>
         </div>

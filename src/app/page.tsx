@@ -133,7 +133,7 @@ export default async function Home() {
                 <span className="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800 font-semibold text-[11px]">
                   VERIFIED ECHO
                 </span>
-                <span className="text-gray-500 font-medium">96% Semantic Similarity</span>
+                <span className="text-gray-500 font-medium">96% Match Confidence</span>
               </div>
 
               <div>
