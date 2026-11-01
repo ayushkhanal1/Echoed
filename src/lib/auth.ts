@@ -20,19 +20,50 @@ export async function syncCognitoUserToDb(
   const defaultAlias = "Echoer_" + Math.floor(100 + Math.random() * 900);
   const initialName = displayName || defaultAlias;
 
-  const query = `
-    INSERT INTO users (cognito_sub, email, display_name)
-    VALUES ($1, $2, $3)
-    ON CONFLICT (cognito_sub) DO UPDATE
-      SET email = EXCLUDED.email,
-          display_name = COALESCE(users.display_name, EXCLUDED.display_name),
-          updated_at = NOW()
-    RETURNING id, cognito_sub, email, display_name, created_at, updated_at;
-  `;
+  // 1. Check if user already exists by cognito_sub
+  const bySub = await db.query(
+    "SELECT id, cognito_sub, email, display_name, created_at, updated_at FROM users WHERE cognito_sub = $1",
+    [cognitoSub]
+  );
+  if (bySub.rows.length > 0) {
+    const updated = await db.query(
+      `UPDATE users
+       SET email = $1,
+           display_name = COALESCE(users.display_name, $2),
+           updated_at = NOW()
+       WHERE cognito_sub = $3
+       RETURNING id, cognito_sub, email, display_name, created_at, updated_at;`,
+      [email, initialName, cognitoSub]
+    );
+    return updated.rows[0];
+  }
 
-  const values = [cognitoSub, email, initialName];
-  const result = await db.query(query, values);
-  return result.rows[0];
+  // 2. Check if user already exists by email (e.g. user was deleted & re-created in Cognito with a new sub)
+  const byEmail = await db.query(
+    "SELECT id, cognito_sub, email, display_name, created_at, updated_at FROM users WHERE email = $1",
+    [email]
+  );
+  if (byEmail.rows.length > 0) {
+    const updated = await db.query(
+      `UPDATE users
+       SET cognito_sub = $1,
+           display_name = COALESCE(users.display_name, $2),
+           updated_at = NOW()
+       WHERE email = $3
+       RETURNING id, cognito_sub, email, display_name, created_at, updated_at;`,
+      [cognitoSub, initialName, email]
+    );
+    return updated.rows[0];
+  }
+
+  // 3. Brand new user: insert fresh record
+  const inserted = await db.query(
+    `INSERT INTO users (cognito_sub, email, display_name)
+     VALUES ($1, $2, $3)
+     RETURNING id, cognito_sub, email, display_name, created_at, updated_at;`,
+    [cognitoSub, email, initialName]
+  );
+  return inserted.rows[0];
 }
 
 // React.cache is available in RSC; in standalone Node CLI scripts it falls back to a passthrough
