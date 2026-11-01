@@ -4,6 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+interface MatchedStory {
+  author_alias: string;
+  title?: string | null;
+  body: string;
+  created_at: string;
+  is_own: boolean;
+}
+
 interface NotificationItem {
   id: string;
   cluster_id: string | null;
@@ -16,6 +24,7 @@ interface NotificationItem {
   preview_summary?: string | null;
   match_reasoning?: string | null;
   consent_status?: string | null;
+  matched_stories?: MatchedStory[] | null;
 }
 
 export default function NotificationsClient({
@@ -153,21 +162,83 @@ export default function NotificationsClient({
 
                       {/* Match Request Card & Flexible Visibility Toggle */}
                       {isMatchRequest && notif.cluster_id && (
-                        <div className="mt-4 p-4 rounded-2xl bg-orange-50/70 border border-orange-200/60 space-y-3">
-                          {notif.thread_title && (
-                            <h5 className="font-bold text-xs uppercase tracking-wider text-orange-900">
-                              Proposed Title: &ldquo;{notif.thread_title}&rdquo;
-                            </h5>
+                        <div className="mt-4 p-5 rounded-2xl bg-orange-50/80 border border-orange-200/80 space-y-4 shadow-sm">
+                          {/* Face Card Headline for Public Scrollers */}
+                          <div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-orange-700 block mb-0.5">
+                              Public Feed Headline Preview
+                            </span>
+                            {notif.thread_title && (
+                              <h5 className="font-bold text-sm text-gray-950 font-serif">
+                                &ldquo;{notif.thread_title}&rdquo;
+                              </h5>
+                            )}
+                            {notif.preview_summary && (
+                              <p className="text-xs text-orange-950/80 italic mt-1">
+                                &ldquo;{notif.preview_summary}&rdquo;
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Authentic Matched Real Stories (Read Before Consenting) */}
+                          {notif.matched_stories && notif.matched_stories.length > 0 && (
+                            <div className="space-y-2 pt-2 border-t border-orange-200/50">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-800 flex items-center gap-1.5">
+                                  <span>📖</span> Authentic Stories (Verify Match Authenticity)
+                                </span>
+                                <span className="text-[10px] text-gray-500">
+                                  Real text submitted by authors
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {notif.matched_stories.map((story, sIdx) => (
+                                  <div
+                                    key={sIdx}
+                                    className={`p-4 rounded-xl border text-xs leading-relaxed space-y-2 ${
+                                      story.is_own
+                                        ? "bg-white/90 border-gray-200 shadow-sm"
+                                        : "bg-amber-100/70 border-amber-300/80 shadow-sm"
+                                    }`}
+                                  >
+                                    <div className="flex items-center justify-between pb-1.5 border-b border-gray-200/50">
+                                      <span className="font-bold text-gray-950 font-serif">
+                                        {story.is_own ? "👤 Your Original Story" : `👥 Matched Story (${story.author_alias})`}
+                                      </span>
+                                      <span className="text-[10px] text-gray-400 font-mono">
+                                        {new Date(story.created_at).toLocaleDateString()}
+                                      </span>
+                                    </div>
+                                    {story.title && (
+                                      <h6 className="font-bold text-gray-900 font-serif text-xs">
+                                        {story.title}
+                                      </h6>
+                                    )}
+                                    <p className="text-gray-700 whitespace-pre-wrap max-h-48 overflow-y-auto pr-1">
+                                      {story.body}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
                           )}
-                          {notif.preview_summary && (
-                            <p className="text-xs text-orange-950 italic">
-                              &ldquo;{notif.preview_summary}&rdquo;
-                            </p>
+
+                          {/* AI Match Analysis */}
+                          {notif.match_reasoning && (
+                            <div className="p-3 rounded-xl bg-white/70 border border-orange-200/60 text-xs text-gray-700 space-y-1">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-orange-800 block">
+                                ✦ AI Match Analysis
+                              </span>
+                              <p className="text-xs text-gray-600 leading-relaxed">
+                                {notif.match_reasoning}
+                              </p>
+                            </div>
                           )}
 
                           {/* Independent Author Visibility Controls */}
                           {notif.consent_status === "accepted" ? (
-                            <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-orange-200/40">
+                            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-orange-200/50">
                               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
                                 ✓ Opted-In to Public Thread
                               </span>
@@ -180,7 +251,7 @@ export default function NotificationsClient({
                               </button>
                             </div>
                           ) : notif.consent_status === "declined" ? (
-                            <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-orange-200/40">
+                            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-orange-200/50">
                               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-xs font-semibold">
                                 🔒 Kept Private to You Only
                               </span>
@@ -193,18 +264,18 @@ export default function NotificationsClient({
                               </button>
                             </div>
                           ) : (
-                            <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-orange-200/40">
+                            <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-orange-200/50">
                               <button
                                 onClick={() => handleConsentAction(notif.cluster_id!, "accept")}
                                 disabled={actingId === notif.cluster_id}
-                                className="px-4 py-2 rounded-full bg-gray-950 hover:bg-black text-white text-xs font-semibold transition-all shadow-sm disabled:opacity-50"
+                                className="px-5 py-2.5 rounded-full bg-gray-950 hover:bg-black text-white text-xs font-semibold transition-all shadow-sm disabled:opacity-50"
                               >
-                                {actingId === notif.cluster_id ? "Saving..." : "Share in Public Thread (Opt-In) →"}
+                                {actingId === notif.cluster_id ? "Saving..." : "✓ Confirm Authenticity & Share Publicly →"}
                               </button>
                               <button
                                 onClick={() => handleConsentAction(notif.cluster_id!, "decline")}
                                 disabled={actingId === notif.cluster_id}
-                                className="px-4 py-2 rounded-full border border-gray-300 hover:bg-gray-100 text-gray-700 text-xs font-semibold transition-all disabled:opacity-50"
+                                className="px-4 py-2.5 rounded-full border border-gray-300 hover:bg-gray-100 text-gray-700 text-xs font-semibold transition-all disabled:opacity-50"
                               >
                                 Keep 100% Private
                               </button>

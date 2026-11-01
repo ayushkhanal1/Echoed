@@ -13,6 +13,14 @@ interface PostItem {
   is_embedded: boolean;
 }
 
+interface MatchedStory {
+  author_alias: string;
+  title?: string | null;
+  body: string;
+  created_at: string;
+  is_own: boolean;
+}
+
 interface MatchItem {
   membership_id: string;
   cluster_id: string;
@@ -26,6 +34,7 @@ interface MatchItem {
   thread_id?: string | null;
   upvote_count?: number;
   comment_count?: number;
+  matched_stories?: MatchedStory[] | null;
 }
 
 interface ProfileProps {
@@ -353,11 +362,67 @@ export default function ProfileClient({
                       {m.thread_title || "Shared Experience Thread"}
                     </h4>
                     {m.preview_summary && (
-                      <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                        {m.preview_summary}
+                      <p className="text-xs sm:text-sm text-gray-600 mt-1 italic">
+                        &ldquo;{m.preview_summary}&rdquo;
                       </p>
                     )}
                   </div>
+
+                  {/* AI Match Reasoning */}
+                  {m.match_reasoning && (
+                    <div className="p-3.5 rounded-2xl bg-orange-50/70 border border-orange-200/60 text-xs text-orange-950 space-y-1">
+                      <span className="font-bold block text-[11px] uppercase tracking-wider text-orange-800">
+                        💡 Match Analysis
+                      </span>
+                      <p className="leading-relaxed">{m.match_reasoning}</p>
+                    </div>
+                  )}
+
+                  {/* Authentic Matched Real Stories (Read Before Consenting) */}
+                  {m.matched_stories && m.matched_stories.length > 0 && (
+                    <div className="space-y-2 pt-2 border-t border-gray-100">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-gray-800 flex items-center gap-1.5">
+                          <span>📖</span> Authentic Stories (Verify Match Authenticity)
+                        </span>
+                        <span className="text-[10px] text-gray-500">
+                          Real text submitted by authors
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {m.matched_stories.map((story, sIdx) => (
+                          <div
+                            key={sIdx}
+                            className={`p-4 rounded-xl border text-xs leading-relaxed space-y-2 ${
+                              story.is_own
+                                ? "bg-white/95 border-gray-200 shadow-sm"
+                                : "bg-amber-50/90 border-amber-200/80 shadow-sm"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between pb-1.5 border-b border-gray-200/50">
+                              <span className="font-bold text-gray-950 font-serif">
+                                {story.is_own ? "👤 Your Original Story" : `👥 Matched Story (${story.author_alias})`}
+                              </span>
+                              <span className="text-[10px] text-gray-400 font-mono">
+                                {new Date(story.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+
+                            {story.title && (
+                              <h6 className="font-semibold text-gray-900 text-xs">
+                                {story.title}
+                              </h6>
+                            )}
+
+                            <p className="text-gray-700 whitespace-pre-wrap">
+                              {story.body}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Independent Author Visibility Controls */}
                   <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3">
